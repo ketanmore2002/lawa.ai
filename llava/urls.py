@@ -28,4 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('rag_app.urls')),
     path('api/', include(router.urls)),
+    path('accounts/', include('allauth.urls')),
+    path('accounts/', include('allauth.socialaccount.urls')),
+
 ]

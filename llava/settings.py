@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,10 +40,11 @@ INSTALLED_APPS = [
 
     'corsheaders',
 
+    'django.contrib.sites',  # Required for allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.apple',
+    'allauth.socialaccount',
 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -54,6 +56,8 @@ INSTALLED_APPS = [
     'rag_app',
 
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -75,7 +79,7 @@ ROOT_URLCONF = 'llava.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -183,9 +187,50 @@ SIMPLE_JWT = {
 
 
 AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+LOGIN_REDIRECT_URL = '/login'
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '1004932899947-k5oiute2c5nqfg3pen39lbtt6bhk7tgr.apps.googleusercontent.com',
+            'secret': 'TzHNJX7fxtBEkkSq-LSUaPXE',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+# SITE_ID = 1 
+
+# LOGIN_REDIRECT_URL = "/"
+
+# # Provider specific settings
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'SCOPE':[
+#             'profile',
+#             'email',
+#         ],
+#         'AUTH_PARAMS': {
+#             'access_type': 'online',
+            
+#         }
+#     }
+# }
+
