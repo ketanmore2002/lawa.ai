@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MyTokenObtainPairView, TokenRefreshView, InteractionsByChatView, UserViewSet, UserDetailsView
+from .views import MyTokenObtainPairView, TokenRefreshView, InteractionsByChatView,UserDetailView, UserListView
 
 # Create a router and register the UserViewSet
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='user')
+# router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     # JWT Token endpoints
@@ -18,5 +18,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
 
-    path('api/user/', UserDetailsView.as_view(), name='user_details'),
+    # path('api/user/', UserDetailsView.as_view(), name='user_details'),
+
+    path('api/user-detail/', UserDetailView.as_view(), name='user-detail'),
+    path('api/user-list/', UserListView.as_view(), name='user-list'),
+
 ]

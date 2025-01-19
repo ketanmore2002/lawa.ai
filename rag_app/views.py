@@ -7,7 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Interaction
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
+from .serializers import UserDetailSerializer
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -22,6 +24,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     serializer_class = ChatSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Chat.objects.filter(user=self.request.user)
+
 
 class InteractionViewSet(viewsets.ModelViewSet):
     queryset = Interaction.objects.all() 
@@ -31,7 +36,7 @@ class InteractionViewSet(viewsets.ModelViewSet):
 
 class InteractionsByChatView(APIView):
     permission_classes = [IsAuthenticated]
-
+ 
     def get(self, request, chat_id):
         try:
             # Retrieve all interactions for the given chat_id
@@ -52,25 +57,40 @@ class LoginHistoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
-    def get_permissions(self):
-        if self.action in ['create', 'destroy']:
-            self.permission_classes = [IsAdminUser]
-        else:
-            self.permission_classes = [IsAuthenticated]
-        return super().get_permissions()
+#     def get_permissions(self):
+#         if self.action in ['create', 'destroy']:
+#             self.permission_classes = [IsAdminUser]
+#         else:
+#             self.permission_classes = [IsAdminUser]
+#         return super().get_permissions()
 
 
-class UserDetailsView(APIView):
-    """
-    View to get details of the currently authenticated user.
-    """
+class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        user = request.user  # Get the authenticated user
-        serializer = UserSerializer(user)  # Serialize the user object
-        return Response(serializer.data)
+        try:
+            user = request.user
+            serializer = UserDetailSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Unable to retrieve user details."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class UserListView(APIView):
+    permission_classes = [IsAdminUser]  # Accessible only to staff and superusers
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        try:
+            users = User.objects.all()
+            serializer = UserDetailSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Unable to retrieve user list."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
